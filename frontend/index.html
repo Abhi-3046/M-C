@@ -1,0 +1,139 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>M&C E-Commerce - Premium Mobile & Computer Store</title>
+    <link rel="stylesheet" href="css/style.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+</head>
+<body>
+    <!-- Navigation -->
+    <nav class="navbar">
+        <div class="nav-container">
+            <div class="logo">M&C Store</div>
+            <ul class="nav-links">
+                <li><a href="index.html">Home</a></li>
+                <li><a href="products.html">Products</a></li>
+                <li class="cart-badge">
+                    <a href="cart.html">🛒 Cart</a>
+                    <span class="badge" style="display: none;">0</span>
+                </li>
+                <li class="auth-links">
+                    <a href="login.html">Login</a>
+                </li>
+            </ul>
+        </div>
+    </nav>
+
+    <!-- Hero Section -->
+    <section class="hero">
+        <div class="container">
+            <h1>Premium Devices, Unbeatable Prices</h1>
+            <p>Discover the latest smartphones and computers at amazing prices</p>
+            <a href="products.html" class="btn btn-primary">Shop Now</a>
+        </div>
+    </section>
+
+    <!-- Featured Products -->
+    <section class="section">
+        <div class="container">
+            <h2 class="text-center mb-2">Featured Products</h2>
+            <p class="text-center" style="margin-bottom: 2rem;">Check out our handpicked premium devices</p>
+            
+            <div id="featuredProducts" class="products-grid">
+                <div class="loading">
+                    <div class="spinner"></div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Categories Section -->
+    <section class="section" style="background: rgba(255, 255, 255, 0.02);">
+        <div class="container">
+            <h2 class="text-center mb-2">Shop by Category</h2>
+            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 2rem; margin-top: 2rem;">
+                <div class="glass-card text-center" style="cursor: pointer;" onclick="window.location.href='products.html?category=smartphones'">
+                    <div style="font-size: 4rem; margin-bottom: 1rem;">📱</div>
+                    <h3>Smartphones</h3>
+                    <p>Latest flagship devices</p>
+                </div>
+                <div class="glass-card text-center" style="cursor: pointer;" onclick="window.location.href='products.html?category=laptops'">
+                    <div style="font-size: 4rem; margin-bottom: 1rem;">💻</div>
+                    <h3>Laptops</h3>
+                    <p>Powerful computing</p>
+                </div>
+                <div class="glass-card text-center" style="cursor: pointer;" onclick="window.location.href='products.html?category=accessories'">
+                    <div style="font-size: 4rem; margin-bottom: 1rem;">🎧</div>
+                    <h3>Accessories</h3>
+                    <p>Premium add-ons</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Why Choose Us -->
+    <section class="section">
+        <div class="container">
+            <h2 class="text-center mb-2">Why Choose Us?</h2>
+            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 2rem; margin-top: 2rem;">
+                <div class="card text-center">
+                    <div style="font-size: 3rem; margin-bottom: 1rem;">🚚</div>
+                    <h3>Fast Delivery</h3>
+                    <p>Quick shipping on all orders</p>
+                </div>
+                <div class="card text-center">
+                    <div style="font-size: 3rem; margin-bottom: 1rem;">🔒</div>
+                    <h3>Secure Payment</h3>
+                    <p>100% secure transactions</p>
+                </div>
+                <div class="card text-center">
+                    <div style="font-size: 3rem; margin-bottom: 1rem;">💯</div>
+                    <h3>Quality Products</h3>
+                    <p>Only authentic items</p>
+                </div>
+                <div class="card text-center">
+                    <div style="font-size: 3rem; margin-bottom: 1rem;">🎁</div>
+                    <h3>Best Prices</h3>
+                    <p>Competitive pricing</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer style="background: rgba(21, 25, 50, 0.8); padding: 3rem 0; margin-top: 4rem; border-top: 1px solid rgba(255, 255, 255, 0.1);">
+        <div class="container text-center">
+            <div class="logo" style="margin-bottom: 1rem; font-size: 2rem;">M&C Store</div>
+            <p style="margin-bottom: 1rem;">Your trusted partner for premium devices</p>
+            <p style="color: var(--text-secondary); font-size: 0.875rem;">© 2026 M&C E-Commerce. All rights reserved.</p>
+        </div>
+    </footer>
+
+    <script src="js/app.js"></script>
+    <script>
+        // Load featured products
+        async function loadFeaturedProducts() {
+            const container = document.getElementById('featuredProducts');
+            
+            try {
+                const products = await apiCall('/products/featured?limit=6');
+                
+                if (products && products.length > 0) {
+                    container.innerHTML = products.map(product => createProductCard(product)).join('');
+                } else {
+                    container.innerHTML = '<p class="text-center" style="grid-column: 1/-1;">No featured products available</p>';
+                }
+            } catch (error) {
+                container.innerHTML = '<p class="text-center" style="grid-column: 1/-1; color: var(--error);">Failed to load products</p>';
+            }
+        }
+
+        // Load on page load
+        loadFeaturedProducts();
+    </script>
+</body>
+</html>

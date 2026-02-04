@@ -1,0 +1,188 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Shopping Cart - M&C E-Commerce</title>
+    <link rel="stylesheet" href="css/style.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+</head>
+
+<body>
+    <!-- Navigation -->
+    <nav class="navbar">
+        <div class="nav-container">
+            <div class="logo">M&C Store</div>
+            <ul class="nav-links">
+                <li><a href="index.html">Home</a></li>
+                <li><a href="products.html">Products</a></li>
+                <li class="cart-badge">
+                    <a href="cart.html">🛒 Cart</a>
+                    <span class="badge" style="display: none;">0</span>
+                </li>
+                <li class="auth-links">
+                    <a href="login.html">Login</a>
+                </li>
+            </ul>
+        </div>
+    </nav>
+
+    <div class="container section">
+        <h1 class="text-center mb-2">Shopping Cart</h1>
+
+        <div style="display: grid; grid-template-columns: 2fr 1fr; gap: 2rem; align-items: start;">
+            <!-- Cart Items -->
+            <div id="cartItems"></div>
+
+            <!-- Cart Summary -->
+            <div class="glass-card" style="position: sticky; top: 100px;">
+                <h2 style="margin-bottom: 1.5rem;">Order Summary</h2>
+
+                <div
+                    style="margin-bottom: 1rem; padding-bottom: 1rem; border-bottom: 1px solid rgba(255, 255, 255, 0.1);">
+                    <div style="display: flex; justify-content: space-between; margin-bottom: 0.5rem;">
+                        <span>Subtotal</span>
+                        <span id="subtotal">₹0.00</span>
+                    </div>
+                    <div style="display: flex; justify-content: space-between; margin-bottom: 0.5rem;">
+                        <span>Shipping</span>
+                        <span style="color: var(--success);">FREE</span>
+                    </div>
+                    <div style="display: flex; justify-content: space-between; margin-bottom: 0.5rem;">
+                        <span>Tax</span>
+                        <span id="tax">₹0.00</span>
+                    </div>
+                </div>
+
+                <div
+                    style="display: flex; justify-content: space-between; font-size: 1.5rem; font-weight: 700; margin-bottom: 1.5rem;">
+                    <span>Total</span>
+                    <span id="total"
+                        style="background: var(--accent-gradient); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;">₹0.00</span>
+                </div>
+
+                <button class="btn btn-primary" onclick="proceedToCheckout()"
+                    style="width: 100%; margin-bottom: 0.5rem;">
+                    Proceed to Checkout
+                </button>
+                <button class="btn btn-secondary" onclick="window.location.href='products.html'" style="width: 100%;">
+                    Continue Shopping
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <footer
+        style="background: rgba(21, 25, 50, 0.8); padding: 3rem 0; margin-top: 4rem; border-top: 1px solid rgba(255, 255, 255, 0.1);">
+        <div class="container text-center">
+            <div class="logo" style="margin-bottom: 1rem; font-size: 2rem;">M&C Store</div>
+            <p style="margin-bottom: 1rem;">Your trusted partner for premium devices</p>
+            <p style="color: var(--text-secondary); font-size: 0.875rem;">© 2026 M&C E-Commerce. All rights reserved.
+            </p>
+        </div>
+    </footer>
+
+    <script src="js/app.js"></script>
+    <script>
+        function renderCart() {
+            const container = document.getElementById('cartItems');
+            const cartItems = cart.cart;
+
+            if (cartItems.length === 0) {
+                container.innerHTML = `
+                    <div class="glass-card text-center" style="padding: 3rem;">
+                        <div style="font-size: 5rem; margin-bottom: 1rem;">🛒</div>
+                        <h2>Your cart is empty</h2>
+                        <p style="margin-bottom: 1.5rem;">Add some products to get started!</p>
+                        <button class="btn btn-primary" onclick="window.location.href='products.html'">
+                            Browse Products
+                        </button>
+                    </div>
+                `;
+                updateSummary();
+                return;
+            }
+
+            container.innerHTML = cartItems.map(item => {
+                const price = item.discount_price || item.price;
+                return `
+                    <div class="cart-item">
+                        <img src="${item.image_url}" alt="${item.name}" class="cart-item-image">
+                        <div class="cart-item-details">
+                            <div style="color: var(--accent-cyan); font-size: 0.875rem; font-weight: 600; text-transform: uppercase;">
+                                ${item.brand}
+                            </div>
+                            <h3 style="margin: 0.5rem 0;">${item.name}</h3>
+                            <p style="font-size: 1.25rem; font-weight: 700; color: var(--accent-cyan); margin: 0.5rem 0;">
+                                ${formatPrice(price)}
+                            </p>
+                            <div class="quantity-controls">
+                                <button class="quantity-btn" onclick="updateQuantity(${item.id}, ${item.quantity - 1})">-</button>
+                                <span style="min-width: 40px; text-align: center; font-weight: 600;">${item.quantity}</span>
+                                <button class="quantity-btn" onclick="updateQuantity(${item.id}, ${item.quantity + 1})">+</button>
+                            </div>
+                        </div>
+                        <div style="text-align: right;">
+                            <p style="font-size: 1.5rem; font-weight: 700; margin-bottom: 1rem;">
+                                ${formatPrice(price * item.quantity)}
+                            </p>
+                            <button class="btn btn-secondary" onclick="removeItem(${item.id})" style="padding: 0.5rem 1rem;">
+                                🗑️ Remove
+                            </button>
+                        </div>
+                    </div>
+                `;
+            }).join('');
+
+            updateSummary();
+        }
+
+        function updateQuantity(productId, newQuantity) {
+            if (newQuantity < 1) {
+                removeItem(productId);
+                return;
+            }
+            cart.updateQuantity(productId, newQuantity);
+            renderCart();
+        }
+
+        function removeItem(productId) {
+            cart.removeItem(productId);
+            renderCart();
+            showNotification('Item removed from cart', 'success');
+        }
+
+        function updateSummary() {
+            const subtotal = cart.getTotal();
+            const tax = subtotal * 0.18; // 18% tax
+            const total = subtotal + tax;
+
+            document.getElementById('subtotal').textContent = formatPrice(subtotal);
+            document.getElementById('tax').textContent = formatPrice(tax);
+            document.getElementById('total').textContent = formatPrice(total);
+        }
+
+        function proceedToCheckout() {
+            if (cart.cart.length === 0) {
+                showNotification('Your cart is empty', 'error');
+                return;
+            }
+
+            if (!isLoggedIn()) {
+                showNotification('Please login to checkout', 'error');
+                setTimeout(() => {
+                    window.location.href = 'login.html?redirect=checkout';
+                }, 1000);
+                return;
+            }
+
+            window.location.href = 'checkout.html';
+        }
+
+        // Render cart on load
+        renderCart();
+    </script>
+</body>
+
+</html>

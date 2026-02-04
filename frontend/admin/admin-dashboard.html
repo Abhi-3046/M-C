@@ -1,0 +1,339 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Dashboard - M&C E-Commerce</title>
+    <link rel="stylesheet" href="../css/style.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+</head>
+
+<body>
+    <!-- Navigation -->
+    <nav class="navbar">
+        <div class="nav-container">
+            <div class="logo">M&C Store - Admin Panel</div>
+            <ul class="nav-links">
+                <li><a href="#" onclick="showSection('products')">Products</a></li>
+                <li><a href="#" onclick="showSection('orders')">Orders</a></li>
+                <li><a href="../index.html">Store</a></li>
+                <li><a href="#" onclick="adminLogout()">Logout</a></li>
+            </ul>
+        </div>
+    </nav>
+
+    <div class="container section">
+        <h1 class="text-center mb-2">Admin Dashboard</h1>
+
+        <!-- Products Section -->
+        <div id="productsSection">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 2rem;">
+                <h2>Product Management</h2>
+                <button class="btn btn-primary" onclick="showAddProductForm()">+ Add New Product</button>
+            </div>
+
+            <!-- Add Product Form -->
+            <div id="addProductForm" class="glass-card hidden" style="margin-bottom: 2rem;">
+                <h3 style="margin-bottom: 1.5rem;">Add New Product</h3>
+                <form id="productForm">
+                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem;">
+                        <div class="form-group">
+                            <label class="form-label">Product Name</label>
+                            <input type="text" class="form-input" id="productName" required>
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">Brand</label>
+                            <input type="text" class="form-input" id="productBrand" required>
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">Category</label>
+                            <select class="form-select" id="productCategory" required>
+                                <option value="1">Smartphones</option>
+                                <option value="2">Laptops</option>
+                                <option value="3">Accessories</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">Price (₹)</label>
+                            <input type="number" class="form-input" id="productPrice" step="0.01" required>
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">Discount Price (₹)</label>
+                            <input type="number" class="form-input" id="productDiscountPrice" step="0.01">
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">Stock Quantity</label>
+                            <input type="number" class="form-input" id="productStock" required>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">Description</label>
+                        <textarea class="form-textarea" id="productDescription" rows="3" required></textarea>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">Image URL</label>
+                        <input type="text" class="form-input" id="productImage" required>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">
+                            <input type="checkbox" id="productFeatured"> Featured Product
+                        </label>
+                    </div>
+                    <div style="display: flex; gap: 1rem;">
+                        <button type="submit" class="btn btn-primary">Add Product</button>
+                        <button type="button" class="btn btn-secondary" onclick="hideAddProductForm()">Cancel</button>
+                    </div>
+                </form>
+            </div>
+
+            <!-- Products List -->
+            <div id="productsContainer" class="products-grid"></div>
+        </div>
+
+        <!-- Orders Section -->
+        <div id="ordersSection" class="hidden">
+            <h2 style="margin-bottom: 2rem;">Order Management</h2>
+            <div id="ordersContainer"></div>
+        </div>
+    </div>
+
+    <footer
+        style="background: rgba(21, 25, 50, 0.8); padding: 3rem 0; margin-top: 4rem; border-top: 1px solid rgba(255, 255, 255, 0.1);">
+        <div class="container text-center">
+            <div class="logo" style="margin-bottom: 1rem; font-size: 2rem;">M&C Store</div>
+            <p style="margin-bottom: 1rem;">Your trusted partner for premium devices</p>
+            <p style="color: var(--text-secondary); font-size: 0.875rem;">© 2026 M&C E-Commerce. All rights reserved.
+            </p>
+        </div>
+    </footer>
+
+    <script>
+        const API_BASE_URL = 'http://localhost:5000/api';
+
+        // Check admin login
+        const adminToken = localStorage.getItem('adminToken');
+        if (!adminToken) {
+            window.location.href = 'admin-login.html';
+        }
+
+        async function apiCall(endpoint, method = 'GET', data = null) {
+            const headers = {
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${adminToken}`
+            };
+
+            const config = { method, headers };
+            if (data && (method === 'POST' || method === 'PUT')) {
+                config.body = JSON.stringify(data);
+            }
+
+            try {
+                const response = await fetch(`${API_BASE_URL}${endpoint}`, config);
+                const result = await response.json();
+                if (!response.ok) throw new Error(result.error || 'An error occurred');
+                return result;
+            } catch (error) {
+                console.error('API Error:', error);
+                throw error;
+            }
+        }
+
+        function formatPrice(price) {
+            return `₹${parseFloat(price).toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
+        }
+
+        function showNotification(message, type = 'info') {
+            const notification = document.createElement('div');
+            notification.innerHTML = `
+                <div style="padding: 1rem; background: ${type === 'success' ? 'rgba(16, 185, 129, 0.2)' : 'rgba(239, 68, 68, 0.2)'}; 
+                     border: 1px solid ${type === 'success' ? '#10b981' : '#ef4444'}; 
+                     color: ${type === 'success' ? '#10b981' : '#ef4444'}; 
+                     border-radius: 0.5rem; position: fixed; top: 20px; right: 20px; z-index: 10000;
+                     backdrop-filter: blur(10px);">${message}</div>
+            `;
+            document.body.appendChild(notification);
+            setTimeout(() => notification.remove(), 3000);
+        }
+
+        function showSection(section) {
+            document.getElementById('productsSection').classList.add('hidden');
+            document.getElementById('ordersSection').classList.add('hidden');
+
+            if (section === 'products') {
+                document.getElementById('productsSection').classList.remove('hidden');
+                loadProducts();
+            } else if (section === 'orders') {
+                document.getElementById('ordersSection').classList.remove('hidden');
+                loadOrders();
+            }
+        }
+
+        function showAddProductForm() {
+            document.getElementById('addProductForm').classList.remove('hidden');
+        }
+
+        function hideAddProductForm() {
+            document.getElementById('addProductForm').classList.add('hidden');
+            document.getElementById('productForm').reset();
+        }
+
+        async function loadProducts() {
+            const container = document.getElementById('productsContainer');
+            container.innerHTML = '<div class="loading"><div class="spinner"></div></div>';
+
+            try {
+                const data = await apiCall('/products?limit=50');
+                const products = data.products || [];
+
+                if (products.length === 0) {
+                    container.innerHTML = '<p class="text-center">No products found</p>';
+                    return;
+                }
+
+                container.innerHTML = products.map(product => `
+                    <div class="product-card">
+                        <div class="product-image-container">
+                            <img src="${product.image_url}" alt="${product.name}" class="product-image">
+                        </div>
+                        <div class="product-info">
+                            <div class="product-brand">${product.brand}</div>
+                            <h3 class="product-name">${product.name}</h3>
+                            <div class="product-price">
+                                <span class="price-current">${formatPrice(product.discount_price || product.price)}</span>
+                            </div>
+                            <p style="color: var(--text-secondary); font-size: 0.875rem; margin: 0.5rem 0;">
+                                Stock: ${product.stock_quantity}
+                            </p>
+                            <div style="display: flex; gap: 0.5rem; margin-top: 1rem;">
+                                <button class="btn btn-secondary" onclick="deleteProduct(${product.id})" style="flex: 1; padding: 0.5rem;">
+                                    Delete
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                `).join('');
+            } catch (error) {
+                container.innerHTML = '<p class="text-center" style="color: var(--error);">Failed to load products</p>';
+            }
+        }
+
+        async function loadOrders() {
+            const container = document.getElementById('ordersContainer');
+            container.innerHTML = '<div class="loading"><div class="spinner"></div></div>';
+
+            try {
+                const data = await apiCall('/admin/orders');
+                const orders = data.orders || [];
+
+                if (orders.length === 0) {
+                    container.innerHTML = '<p class="text-center">No orders found</p>';
+                    return;
+                }
+
+                container.innerHTML = orders.map(order => {
+                    const statusColors = {
+                        pending: 'var(--warning)',
+                        processing: 'var(--accent-cyan)',
+                        shipped: 'var(--accent-purple)',
+                        delivered: 'var(--success)',
+                        cancelled: 'var(--error)'
+                    };
+
+                    return `
+                        <div class="card" style="margin-bottom: 1rem;">
+                            <div style="display: flex; justify-content: space-between; margin-bottom: 1rem;">
+                                <div>
+                                    <h3>Order #${order.id}</h3>
+                                    <p style="color: var(--text-secondary);">Customer: ${order.full_name} (${order.email})</p>
+                                    <p style="color: var(--text-secondary); font-size: 0.875rem;">
+                                        ${new Date(order.created_at).toLocaleDateString('en-IN')}
+                                    </p>
+                                </div>
+                                <div style="text-align: right;">
+                                    <p style="font-size: 1.5rem; font-weight: 700; color: var(--accent-cyan);">
+                                        ${formatPrice(order.total_amount)}
+                                    </p>
+                                </div>
+                            </div>
+                            <div style="display: flex; gap: 1rem; align-items: center;">
+                                <select class="form-select" style="flex: 1;" onchange="updateOrderStatus(${order.id}, this.value)">
+                                    <option value="pending" ${order.status === 'pending' ? 'selected' : ''}>Pending</option>
+                                    <option value="processing" ${order.status === 'processing' ? 'selected' : ''}>Processing</option>
+                                    <option value="shipped" ${order.status === 'shipped' ? 'selected' : ''}>Shipped</option>
+                                    <option value="delivered" ${order.status === 'delivered' ? 'selected' : ''}>Delivered</option>
+                                    <option value="cancelled" ${order.status === 'cancelled' ? 'selected' : ''}>Cancelled</option>
+                                </select>
+                                <span style="padding: 0.5rem 1rem; background: rgba(255, 255, 255, 0.1); border-radius: 0.5rem; border: 1px solid ${statusColors[order.status]}; color: ${statusColors[order.status]}; font-weight: 600; text-transform: uppercase; font-size: 0.875rem;">
+                                    ${order.status}
+                                </span>
+                            </div>
+                        </div>
+                    `;
+                }).join('');
+            } catch (error) {
+                container.innerHTML = '<p class="text-center" style="color: var(--error);">Failed to load orders</p>';
+            }
+        }
+
+        document.getElementById('productForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+
+            const productData = {
+                name: document.getElementById('productName').value,
+                brand: document.getElementById('productBrand').value,
+                category_id: parseInt(document.getElementById('productCategory').value),
+                price: parseFloat(document.getElementById('productPrice').value),
+                discount_price: document.getElementById('productDiscountPrice').value ?
+                    parseFloat(document.getElementById('productDiscountPrice').value) : null,
+                stock_quantity: parseInt(document.getElementById('productStock').value),
+                description: document.getElementById('productDescription').value,
+                image_url: document.getElementById('productImage').value,
+                is_featured: document.getElementById('productFeatured').checked,
+                specifications: {}
+            };
+
+            try {
+                await apiCall('/admin/products', 'POST', productData);
+                showNotification('Product added successfully!', 'success');
+                hideAddProductForm();
+                loadProducts();
+            } catch (error) {
+                showNotification('Failed to add product: ' + error.message, 'error');
+            }
+        });
+
+        async function deleteProduct(productId) {
+            if (!confirm('Are you sure you want to delete this product?')) return;
+
+            try {
+                await apiCall(`/admin/products/${productId}`, 'DELETE');
+                showNotification('Product deleted successfully!', 'success');
+                loadProducts();
+            } catch (error) {
+                showNotification('Failed to delete product: ' + error.message, 'error');
+            }
+        }
+
+        async function updateOrderStatus(orderId, newStatus) {
+            try {
+                await apiCall(`/admin/orders/${orderId}`, 'PUT', { status: newStatus });
+                showNotification('Order status updated!', 'success');
+                loadOrders();
+            } catch (error) {
+                showNotification('Failed to update order: ' + error.message, 'error');
+            }
+        }
+
+        function adminLogout() {
+            localStorage.removeItem('adminToken');
+            localStorage.removeItem('adminUser');
+            window.location.href = 'admin-login.html';
+        }
+
+        // Load products by default
+        loadProducts();
+    </script>
+</body>
+
+</html>

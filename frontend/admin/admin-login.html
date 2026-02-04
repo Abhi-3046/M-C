@@ -1,0 +1,130 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Login - M&C E-Commerce</title>
+    <link rel="stylesheet" href="../css/style.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+</head>
+
+<body>
+    <!-- Navigation -->
+    <nav class="navbar">
+        <div class="nav-container">
+            <div class="logo">M&C Store - Admin</div>
+            <ul class="nav-links">
+                <li><a href="../index.html">Back to Store</a></li>
+            </ul>
+        </div>
+    </nav>
+
+    <div class="container section">
+        <div style="max-width: 500px; margin: 0 auto;">
+            <div class="glass-card">
+                <h1 class="text-center mb-2">Admin Login</h1>
+                <p class="text-center" style="margin-bottom: 2rem;">Access the admin dashboard</p>
+
+                <div id="errorMessage" class="alert alert-error hidden"></div>
+
+                <form id="adminLoginForm">
+                    <div class="form-group">
+                        <label class="form-label">Username</label>
+                        <input type="text" class="form-input" id="username" required value="admin">
+                    </div>
+
+                    <div class="form-group">
+                        <label class="form-label">Password</label>
+                        <input type="password" class="form-input" id="password" required value="admin123">
+                    </div>
+
+                    <button type="submit" class="btn btn-primary" style="width: 100%; margin-top: 1rem;">
+                        Login as Admin
+                    </button>
+                </form>
+
+                <div class="alert"
+                    style="background: rgba(102, 126, 234, 0.1); border: 1px solid var(--accent-purple); color: var(--accent-purple); margin-top: 1.5rem;">
+                    <strong>Demo Credentials:</strong><br>
+                    Username: admin<br>
+                    Password: admin123
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <footer
+        style="background: rgba(21, 25, 50, 0.8); padding: 3rem 0; margin-top: 4rem; border-top: 1px solid rgba(255, 255, 255, 0.1);">
+        <div class="container text-center">
+            <div class="logo" style="margin-bottom: 1rem; font-size: 2rem;">M&C Store</div>
+            <p style="margin-bottom: 1rem;">Your trusted partner for premium devices</p>
+            <p style="color: var(--text-secondary); font-size: 0.875rem;">© 2026 M&C E-Commerce. All rights reserved.
+            </p>
+        </div>
+    </footer>
+
+    <script>
+        const API_BASE_URL = 'http://localhost:5000/api';
+
+        async function apiCall(endpoint, method = 'GET', data = null, requiresAuth = false) {
+            const headers = {
+                'Content-Type': 'application/json',
+            };
+
+            if (requiresAuth) {
+                const token = localStorage.getItem('adminToken');
+                if (token) {
+                    headers['Authorization'] = `Bearer ${token}`;
+                }
+            }
+
+            const config = {
+                method,
+                headers,
+            };
+
+            if (data && (method === 'POST' || method === 'PUT')) {
+                config.body = JSON.stringify(data);
+            }
+
+            try {
+                const response = await fetch(`${API_BASE_URL}${endpoint}`, config);
+                const result = await response.json();
+
+                if (!response.ok) {
+                    throw new Error(result.error || 'An error occurred');
+                }
+
+                return result;
+            } catch (error) {
+                console.error('API Error:', error);
+                throw error;
+            }
+        }
+
+        document.getElementById('adminLoginForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+
+            const username = document.getElementById('username').value;
+            const password = document.getElementById('password').value;
+            const errorDiv = document.getElementById('errorMessage');
+
+            errorDiv.classList.add('hidden');
+
+            try {
+                const result = await apiCall('/admin/login', 'POST', { username, password });
+
+                localStorage.setItem('adminToken', result.token);
+                localStorage.setItem('adminUser', JSON.stringify(result.admin));
+
+                window.location.href = 'admin-dashboard.html';
+            } catch (error) {
+                errorDiv.textContent = error.message || 'Login failed';
+                errorDiv.classList.remove('hidden');
+            }
+        });
+    </script>
+</body>
+
+</html>
