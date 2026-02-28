@@ -599,6 +599,7 @@ def contact():
             db.close()
 
 
+<<<<<<< HEAD
 # ---------- ADMIN: GET ALL USERS ----------
 @app.route("/admin/users", methods=["GET"])
 def admin_get_users():
@@ -743,6 +744,8 @@ def admin_get_messages():
         if db: db.close()
 
 
+=======
+>>>>>>> c1c2edbf430a00b826dd558d11ff35c6bebea88a
 # ---------- RUN SERVER ----------
 if __name__ == "__main__":
     print("Starting Flask server...")
