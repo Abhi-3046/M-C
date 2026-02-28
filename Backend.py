@@ -599,6 +599,153 @@ def contact():
             db.close()
 
 
+<<<<<<< HEAD
+# ---------- ADMIN: GET ALL USERS ----------
+@app.route("/admin/users", methods=["GET"])
+def admin_get_users():
+    db = None
+    cursor = None
+    try:
+        db, cursor = get_cursor()
+        if db is None or cursor is None:
+            return jsonify({"message": "Database connection failed"}), 500
+        cursor.execute("SELECT user_id, username, email, role FROM users ORDER BY user_id DESC")
+        users = cursor.fetchall()
+        return jsonify(users), 200
+    except Error as e:
+        print(f"Database error: {e}")
+        return jsonify({"message": "Database error"}), 500
+    finally:
+        if cursor: cursor.close()
+        if db: db.close()
+
+
+# ---------- ADMIN: DELETE USER ----------
+@app.route("/admin/users/<int:user_id>", methods=["DELETE"])
+def admin_delete_user(user_id):
+    db = None
+    cursor = None
+    try:
+        db, cursor = get_cursor()
+        if db is None or cursor is None:
+            return jsonify({"message": "Database connection failed"}), 500
+        cursor.execute("DELETE FROM users WHERE user_id=%s", (user_id,))
+        if cursor.rowcount == 0:
+            return jsonify({"message": "User not found"}), 404
+        db.commit()
+        return jsonify({"message": "User deleted successfully"}), 200
+    except Error as e:
+        if db: db.rollback()
+        print(f"Database error: {e}")
+        return jsonify({"message": "Database error"}), 500
+    finally:
+        if cursor: cursor.close()
+        if db: db.close()
+
+
+# ---------- ADMIN: GET ALL ORDERS ----------
+@app.route("/admin/orders", methods=["GET"])
+def admin_get_orders():
+    db = None
+    cursor = None
+    try:
+        db, cursor = get_cursor()
+        if db is None or cursor is None:
+            return jsonify({"message": "Database connection failed"}), 500
+        cursor.execute("SELECT * FROM orders ORDER BY order_id DESC")
+        orders = cursor.fetchall()
+        # Convert date objects to strings for JSON serialization
+        for o in orders:
+            if o.get("order_date"):
+                o["order_date"] = str(o["order_date"])
+        return jsonify(orders), 200
+    except Error as e:
+        print(f"Database error: {e}")
+        return jsonify({"message": "Database error"}), 500
+    finally:
+        if cursor: cursor.close()
+        if db: db.close()
+
+
+# ---------- ADMIN: UPDATE ORDER STATUS ----------
+@app.route("/admin/orders/<int:order_id>", methods=["PUT"])
+def admin_update_order(order_id):
+    db = None
+    cursor = None
+    try:
+        if not request.json or "status" not in request.json:
+            return jsonify({"message": "Status is required"}), 400
+        db, cursor = get_cursor()
+        if db is None or cursor is None:
+            return jsonify({"message": "Database connection failed"}), 500
+        cursor.execute("UPDATE orders SET status=%s WHERE order_id=%s",
+                       (request.json["status"], order_id))
+        if cursor.rowcount == 0:
+            return jsonify({"message": "Order not found"}), 404
+        db.commit()
+        return jsonify({"message": "Order status updated"}), 200
+    except Error as e:
+        if db: db.rollback()
+        print(f"Database error: {e}")
+        return jsonify({"message": "Database error"}), 500
+    finally:
+        if cursor: cursor.close()
+        if db: db.close()
+
+
+# ---------- ADMIN: DELETE PRODUCT ----------
+@app.route("/admin/products/<int:product_id>", methods=["DELETE"])
+def admin_delete_product(product_id):
+    db = None
+    cursor = None
+    try:
+        db, cursor = get_cursor()
+        if db is None or cursor is None:
+            return jsonify({"message": "Database connection failed"}), 500
+        cursor.execute("DELETE FROM products WHERE product_id=%s", (product_id,))
+        if cursor.rowcount == 0:
+            return jsonify({"message": "Product not found"}), 404
+        db.commit()
+        return jsonify({"message": "Product deleted successfully"}), 200
+    except Error as e:
+        if db: db.rollback()
+        print(f"Database error: {e}")
+        return jsonify({"message": "Database error"}), 500
+    finally:
+        if cursor: cursor.close()
+        if db: db.close()
+
+
+# ---------- ADMIN: GET CONTACT MESSAGES ----------
+@app.route("/admin/messages", methods=["GET"])
+def admin_get_messages():
+    db = None
+    cursor = None
+    try:
+        db, cursor = get_cursor()
+        if db is None or cursor is None:
+            return jsonify({"message": "Database connection failed"}), 500
+        cursor.execute("""
+            SELECT message_id, user_id, name, email, subject, message, status, created_at
+            FROM contact_messages
+            ORDER BY message_id DESC
+        """)
+        messages = cursor.fetchall()
+        for m in messages:
+            if m.get("created_at"):
+                m["created_at"] = str(m["created_at"])
+        return jsonify(messages), 200
+    except Error as e:
+        print(f"Database error: {e}")
+        # Return empty list if table doesn't exist yet
+        return jsonify([]), 200
+    finally:
+        if cursor: cursor.close()
+        if db: db.close()
+
+
+=======
+>>>>>>> c1c2edbf430a00b826dd558d11ff35c6bebea88a
 # ---------- RUN SERVER ----------
 if __name__ == "__main__":
     print("Starting Flask server...")
