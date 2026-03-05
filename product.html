@@ -219,6 +219,7 @@
       color: #373440;
     }
 
+<<<<<<< HEAD
     /* ── More Products Section ── */
     .more-products-section {
       max-width: 1200px;
@@ -344,6 +345,8 @@
       padding: 1rem 0;
     }
 
+=======
+>>>>>>> f557dceefa95198fe2da9eb18088cd9897790c19
     @media (max-width: 768px) {
       .product-container {
         grid-template-columns: 1fr;
@@ -354,10 +357,13 @@
         flex-direction: column;
         gap: 0.5rem;
       }
+<<<<<<< HEAD
 
       .products-grid {
         grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
       }
+=======
+>>>>>>> f557dceefa95198fe2da9eb18088cd9897790c19
     }
   </style>
 </head>
@@ -420,6 +426,7 @@
     </div>
   </div>
 
+<<<<<<< HEAD
   <!-- ── More Products Section ── -->
   <section class="more-products-section">
     <h2>More Products</h2>
@@ -526,6 +533,8 @@
     </div>
   </section>
 
+=======
+>>>>>>> f557dceefa95198fe2da9eb18088cd9897790c19
   <script>
     const API_BASE_URL = 'http://localhost:5000';
     let currentUserId = localStorage.getItem('userId') || null;
@@ -636,6 +645,7 @@
       }
     }
 
+<<<<<<< HEAD
     // ── Quick Add to Cart (More Products section) ──
     async function quickAddToCart(productId, name, price) {
       if (!currentUserId) {
@@ -661,6 +671,8 @@
       }
     }
 
+=======
+>>>>>>> f557dceefa95198fe2da9eb18088cd9897790c19
     // Load product when page loads
     window.addEventListener('DOMContentLoaded', () => {
       loadProduct();
@@ -671,12 +683,18 @@
     function updateAuthUI() {
       const authLink = document.getElementById('authLink');
       const username = localStorage.getItem('username');
+<<<<<<< HEAD
       const isGuest = localStorage.getItem('isGuest');
 
       if (currentUserId) {
         authLink.innerHTML = `<a href="#" onclick="logout()">Logout (${username})</a>`;
       } else if (isGuest) {
         authLink.innerHTML = `<span style="color:rgba(255,255,255,0.7);font-size:0.95rem;">👤 Guest &nbsp;</span><a href="loginpage.html" style="color:white;">Login</a>`;
+=======
+
+      if (currentUserId) {
+        authLink.innerHTML = `<a href="#" onclick="logout()">Logout (${username})</a>`;
+>>>>>>> f557dceefa95198fe2da9eb18088cd9897790c19
       } else {
         authLink.innerHTML = `<a href="loginpage.html">Login</a>`;
       }

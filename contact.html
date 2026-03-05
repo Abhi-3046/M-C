@@ -474,14 +474,20 @@
         // Auth State Management
         function updateAuthUI() {
             const userId = localStorage.getItem('userId');
+<<<<<<< HEAD
             const isGuest = localStorage.getItem('isGuest');
+=======
+>>>>>>> f557dceefa95198fe2da9eb18088cd9897790c19
             const username = localStorage.getItem('username');
             const authLink = document.getElementById('authLink');
 
             if (userId) {
                 authLink.innerHTML = `<a href="#" onclick="logout()">Logout (${username})</a>`;
+<<<<<<< HEAD
             } else if (isGuest) {
                 authLink.innerHTML = `<span style="color:rgba(255,255,255,0.7);font-size:0.95rem;">👤 Guest &nbsp;</span><a href="loginpage.html" style="color:white;">Login</a>`;
+=======
+>>>>>>> f557dceefa95198fe2da9eb18088cd9897790c19
             } else {
                 authLink.innerHTML = `<a href="loginpage.html">Login</a>`;
             }
