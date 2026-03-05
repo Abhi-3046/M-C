@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 # M&C E-Commerce - Complete Setup Guide
 
 ## Overview
@@ -164,3 +165,7 @@ M&C e-commerce/
 - Default payment method is Cash on Delivery
 
 Enjoy your M&C E-Commerce platform! 🚀
+=======
+# MsM_s
+mobile Shop Management System
+>>>>>>> b16a67c4e3593867ff52bde60cc54807bc11fba5
